@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace TechAssesment.Models
+namespace TechAssesment.Core.ViewModels
 {
     // Models returned by AccountController actions.
 

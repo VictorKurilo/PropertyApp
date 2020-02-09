@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace TechAssesment.Dto
+﻿namespace TechAssesment.Core.Dto
 {
     public class PropertyDto
     {

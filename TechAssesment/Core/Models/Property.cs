@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace TechAssesment.Models
+﻿namespace TechAssesment.Core.Models
 {
     public class Property
     {
