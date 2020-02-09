@@ -6,12 +6,14 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
+using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
+using TechAssesment.Dto;
 using TechAssesment.Models;
 
 namespace TechAssesment.Controllers
 {
-    [Authorize]
+    [System.Web.Http.Authorize]
     public class PropertyController : ApiController
     {
 
@@ -22,32 +24,55 @@ namespace TechAssesment.Controllers
             _context = new ApplicationDbContext();
         }
 
-        // api/Property
+        //GetAll: api/Property
         [System.Web.Http.HttpGet]
         public IHttpActionResult GetAll()
         {
             var userId = User.Identity.GetUserId();
 
             var properties = _context.Properties.Where(property => property.OwnerId == userId).ToList();
-            
-            if (properties.Count == 0)
+
+            ICollection<PropertyDto> propertyDtos = new List<PropertyDto>();
+
+            foreach (var property in properties)
+            {
+                propertyDtos.Add(new PropertyDto()
+                {
+                    Id = property.Id,
+                    Name = property.Name,
+                    Description = property.Description,
+                });
+            }
+
+            if (propertyDtos.Count == 0)
                 return NotFound();
 
-            return Ok(properties);
+            return Ok(propertyDtos);
         }
 
+        //Get: api/Property/{id}
         public IHttpActionResult Get(int id)
         {
             var currentProperty = _context.Properties.SingleOrDefault(property => property.Id == id);
-            
+
             if (currentProperty == null)
                 return NotFound();
 
-            return Ok(currentProperty);
+            if (currentProperty.OwnerId != User.Identity.GetUserId())
+                return Unauthorized();
+
+            PropertyDto propertyDto = new PropertyDto();
+
+            propertyDto.Id = currentProperty.Id;
+            propertyDto.Name = currentProperty.Name;
+            propertyDto.Description = currentProperty.Description;
+
+            return Ok(propertyDto);
         }
 
-        // api/Property
+        //Post: api/Property
         [System.Web.Http.HttpPost]
+        [ValidateAntiForgeryToken]
         public IHttpActionResult Add(PropertyViewModel propertyViewModel)
         {
             if (!ModelState.IsValid)
@@ -65,6 +90,7 @@ namespace TechAssesment.Controllers
             return Ok();
         }
 
+        //Update: api/Property
         [System.Web.Http.HttpPut]
         public IHttpActionResult Update(PropertyViewModel propertyViewModel)
         {
@@ -89,6 +115,7 @@ namespace TechAssesment.Controllers
             return Ok();
         }
 
+        //Delete: api/Property/{id}
         [System.Web.Http.HttpDelete]
         public IHttpActionResult Remove(int id)
         {
@@ -100,7 +127,6 @@ namespace TechAssesment.Controllers
             if (currentProperty.OwnerId != User.Identity.GetUserId())
                 return Unauthorized();
            
-
             _context.Entry(currentProperty).State = EntityState.Deleted;
             _context.SaveChanges();
 
