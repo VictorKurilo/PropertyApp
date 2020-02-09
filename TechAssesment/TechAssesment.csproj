@@ -211,6 +211,8 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PropertyController.cs" />
+    <Compile Include="Controllers\PropertyViewModel.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -218,6 +220,10 @@
     <Compile Include="Migrations\202002090126524_initialModel.cs" />
     <Compile Include="Migrations\202002090126524_initialModel.designer.cs">
       <DependentUpon>202002090126524_initialModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202002090139288_added name to application user.cs" />
+    <Compile Include="Migrations\202002090139288_added name to application user.designer.cs">
+      <DependentUpon>202002090139288_added name to application user.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -321,6 +327,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202002090126524_initialModel.resx">
       <DependentUpon>202002090126524_initialModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202002090139288_added name to application user.resx">
+      <DependentUpon>202002090139288_added name to application user.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
