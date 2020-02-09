@@ -3,7 +3,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
-using TechAssesment.Models;
+using TechAssesment.Core.Models;
+using TechAssesment.Persistence;
 
 namespace TechAssesment
 {

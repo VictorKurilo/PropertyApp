@@ -8,20 +8,21 @@ using System.Web.Http;
 using System.Web.Http.Results;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
-using TechAssesment.Dto;
-using TechAssesment.Models;
+using TechAssesment.Core;
+using TechAssesment.Core.Dto;
+using TechAssesment.Core.Models;
+using TechAssesment.Persistence;
 
 namespace TechAssesment.Controllers
 {
     [System.Web.Http.Authorize]
     public class PropertyController : ApiController
     {
+        private readonly IUnitOfWork _unitOfWork;
 
-        private readonly ApplicationDbContext _context;
-
-        public PropertyController()
+        public PropertyController(IUnitOfWork unitOfWork)
         {
-            _context = new ApplicationDbContext();
+            _unitOfWork = unitOfWork;
         }
 
         //GetAll: api/Property
@@ -30,7 +31,7 @@ namespace TechAssesment.Controllers
         {
             var userId = User.Identity.GetUserId();
 
-            var properties = _context.Properties.Where(property => property.OwnerId == userId).ToList();
+            var properties = _unitOfWork.Properties.GetAllProperties(userId);
 
             ICollection<PropertyDto> propertyDtos = new List<PropertyDto>();
 
@@ -50,10 +51,10 @@ namespace TechAssesment.Controllers
             return Ok(propertyDtos);
         }
 
-        //Get: api/Property/{id}
+        //GetPropertyById: api/Property/{id}
         public IHttpActionResult Get(int id)
         {
-            var currentProperty = _context.Properties.SingleOrDefault(property => property.Id == id);
+            var currentProperty = _unitOfWork.Properties.GetPropertyById(id);
 
             if (currentProperty == null)
                 return NotFound();
@@ -75,17 +76,13 @@ namespace TechAssesment.Controllers
         [ValidateAntiForgeryToken]
         public IHttpActionResult Add(PropertyViewModel propertyViewModel)
         {
+            var userId = User.Identity.GetUserId();
+
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
 
-            _context.Properties.Add(new Property()
-            {
-                Name = propertyViewModel.Name,
-                Description = propertyViewModel.Description,
-                OwnerId = User.Identity.GetUserId()
-            });
-
-            _context.SaveChanges();
+            _unitOfWork.Properties.AddProperty(propertyViewModel, userId);
+            _unitOfWork.Complete();
 
             return Ok();
         }
@@ -95,7 +92,10 @@ namespace TechAssesment.Controllers
         public IHttpActionResult Update(PropertyViewModel propertyViewModel)
         {
             var userId = User.Identity.GetUserId();
-            var existingProperty = _context.Properties.FirstOrDefault(property => property.Id == propertyViewModel.Id);
+            var existingProperty = _unitOfWork.Properties.GetPropertyById(propertyViewModel.Id);
+
+            if (existingProperty.OwnerId != User.Identity.GetUserId())
+                return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
@@ -105,7 +105,7 @@ namespace TechAssesment.Controllers
                 existingProperty.Name = propertyViewModel.Name;
                 existingProperty.Description = propertyViewModel.Description;
 
-                _context.SaveChanges();
+                _unitOfWork.Complete();
             }
             else
             {
@@ -119,7 +119,7 @@ namespace TechAssesment.Controllers
         [System.Web.Http.HttpDelete]
         public IHttpActionResult Remove(int id)
         {
-            var currentProperty = _context.Properties.FirstOrDefault(property => property.Id == id);
+            var currentProperty = _unitOfWork.Properties.GetPropertyById(id);
 
             if (id <= 0 || currentProperty == null)
                 return BadRequest("not valid property");
@@ -127,8 +127,8 @@ namespace TechAssesment.Controllers
             if (currentProperty.OwnerId != User.Identity.GetUserId())
                 return Unauthorized();
            
-            _context.Entry(currentProperty).State = EntityState.Deleted;
-            _context.SaveChanges();
+            _unitOfWork.Properties.DeletePropertyById(currentProperty);
+            _unitOfWork.Complete();
 
             return Ok();
         }
