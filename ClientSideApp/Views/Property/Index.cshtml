@@ -1,4 +1,5 @@
 ﻿@model PagedList.IPagedList<ClientSideApp.ViewModels.PropertyViewModel>
+@using System.Activities.Statements
 @using PagedList.Mvc;
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 
@@ -8,51 +9,73 @@
 
 <h2 class="lead">Properties</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create", null, new{@class = "btn btn-primary"})
-</p>
-@using (Html.BeginForm("Index", "Property", FormMethod.Get))
+@if (Model == null)
 {
+    <p>No property found</p>
+
+    <p>Add new property</p>
+
     <p>
-        Find by name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
-        <input type="submit" value="Search" />
+        @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-primary" })
     </p>
 }
-<table class="table">
-    <tr>
-        <th>
-            @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
-        </th>
-        <th>
-            First Name
-        </th>
-        <th>
-            @Html.ActionLink("Description", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter })
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
+else 
+{
+    <p>
+        @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-primary" })
+    </p>
+    using (Html.BeginForm("Index", "Property", FormMethod.Get))
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-           
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new {@class = "btn btn-info"}) 
-                @Html.ActionLink("Details", "Details", new { id = item.Id }, new {@class = "btn btn-success"}) 
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new {@class = "btn btn-danger"})
-            </td>
-        </tr>
+        <p>
+            Find by name: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+            <input type="submit" value="Search" />
+        </p>
     }
+    <table class="table">
+        <tr>
+            <th>
+                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+            </th>
+            <th>
+                First Name
+            </th>
+            <th>
+                @Html.ActionLink("Description", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter })
+            </th>
+            <th></th>
+        </tr>
 
-</table>
-<br />
-Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
 
-@Html.PagedListPager(Model, page => Url.Action("Index",
-    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-info" })
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-success" })
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger" })
+                </td>
+            </tr>
+        }
+
+    </table>
+    <br />
+    @:Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+
+
+
+
+
+
+
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+}
+
+

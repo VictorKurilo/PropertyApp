@@ -33,6 +33,9 @@ namespace ClientSideApp.Controllers
         {
             var properties = _propertyRepository.GetPropertyList();
 
+            if (properties == null)
+                return View();
+
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
@@ -48,12 +51,12 @@ namespace ClientSideApp.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var homes = from s in properties
-                           select s;
+            var homes = from property in properties
+                           select property;
             if (!String.IsNullOrEmpty(searchString))
             {
-                homes = homes.Where(s => s.Name.Contains(searchString)
-                                               || s.Description.Contains(searchString));
+                homes = homes.Where(home => home.Name.Contains(searchString)
+                                               || home.Description.Contains(searchString));
             }
             switch (sortOrder)
             {
