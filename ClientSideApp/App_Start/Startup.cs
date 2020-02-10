@@ -19,7 +19,7 @@ namespace ClientSideApp
             });
 
             // Use a cookie to temporarily store information about a user logging in with a third party login provider
-            //app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
+            app.UseExternalSignInCookie(DefaultAuthenticationTypes.ApplicationCookie);
         }
     }
 }
