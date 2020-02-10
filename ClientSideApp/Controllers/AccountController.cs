@@ -103,6 +103,7 @@ namespace ClientSideApp.Controllers
                 var identity = new ClaimsIdentity(claims, "ApplicationCookie");
 
                 Request.GetOwinContext().Authentication.SignIn(options, identity);
+                
             }
             return RedirectToAction("Index", "Home");
         }
