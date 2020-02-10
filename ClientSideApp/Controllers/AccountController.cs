@@ -87,6 +87,9 @@ namespace ClientSideApp.Controllers
 
                 var token = JsonConvert.DeserializeObject<Access>(resultContent);
 
+                if(string.IsNullOrWhiteSpace(token.access_token))
+                    return RedirectToAction("Login", "Account");
+
                 AuthenticationProperties options = new AuthenticationProperties();
 
                //options.AllowRefresh = true;
