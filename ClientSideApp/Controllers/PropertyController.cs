@@ -8,37 +8,79 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using ClientSideApp.Models;
+using ClientSideApp.Repositories;
 using ClientSideApp.Services;
 using ClientSideApp.ViewModels;
 using Newtonsoft.Json;
+using PagedList;
 
 namespace ClientSideApp.Controllers
 {
     [Authorize]
     public class PropertyController : Controller
     {
-
         private readonly IPropertyService _propertyService;
+        private readonly IPropertyRepository _propertyRepository;
 
-        public PropertyController()
+        public PropertyController(IPropertyRepository propertyRepository)
         {
             _propertyService = new PropertyService(new HttpClient());
+            _propertyRepository = propertyRepository;
         }
 
         // GET: Property
-        public ActionResult Index()
+        public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            var response = _propertyService.GetProperties();
+            var properties = _propertyRepository.GetPropertyList();
 
-            var properties = JsonConvert.DeserializeObject<ICollection<PropertyViewModel>>(response);
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
 
-            return View(properties);
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+
+            var homes = from s in properties
+                           select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                homes = homes.Where(s => s.Name.Contains(searchString)
+                                               || s.Description.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    homes = homes.OrderByDescending(s => s.Name);
+                    break;
+                default:  // Name ascending 
+                    homes = homes.OrderBy(s => s.Name);
+                    break;
+            }
+
+            int pageSize = 5;
+            int pageNumber = (page ?? 1);
+
+            return View(homes.ToPagedList(pageNumber, pageSize));
         }
+
+
 
         // GET: Property/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var response = _propertyService.GetPropertyById(id);
+
+            var property = JsonConvert.DeserializeObject<PropertyViewModel>(response);
+
+            return View(property);
         }
 
         // GET: Property/Create
